@@ -1,0 +1,52 @@
+{% extends "navbar.html" %}
+
+
+
+{% block head %}
+  <script>
+    // Auto-submit the form after 15 minutes (900,000 ms)
+    setTimeout(function() {
+        document.getElementById("quizForm").submit();
+    }, 900000);
+  </script>
+{% endblock %}
+
+{% block title %}Take Quiz{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Quiz: {{ module_name }} (Subject ID: {{ subject_id }})</h1>
+  <p>You have 15 minutes to complete this quiz. It will be auto-submitted when time expires.</p>
+
+  {% if quiz_score is defined %}
+    <div class="alert alert-info">
+      <h4>Your Score: {{ quiz_score }}%</h4>
+    </div>
+    <a href="{{ url_for('quiz_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+  {% else %}
+    <form id="quizForm" method="POST" action="{{ url_for('take_quiz', subject_id=subject_id, module_name=module_name) }}">
+      {% for question in questions %}
+      <div class="mb-4 p-3 border rounded">
+        <h5>Question {{ loop.index }}: {{ question.question_text }}</h5>
+        {% for option in question.options %}
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_option_{{ option.id }}" value="{{ option.id }}" required>
+          <label class="form-check-label" for="q{{ question.id }}_option_{{ option.id }}">
+            {{ option.option_text }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Submit Quiz</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
+
+
+
+
+
+
+

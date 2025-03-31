@@ -1,0 +1,72 @@
+{% extends "navbar.html" %}
+
+
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-success" role="alert">
+        {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+<div class="container mt-4">
+    
+    <h1>Subscribe to a New Subject</h1`>
+    <form method="POST" action="{{ url_for('enroll_subject') }}">
+        <div class="mb-3">
+            <label for="subject_select" class="form-label">Select a Subject to Enroll</label>
+            <select class="form-select" id="subject_select" name="subject_id" required>
+                <option value="" disabled selected>Select a subject</option>
+                {% for subject in subject %}
+                    <option value="{{ subject.subject_id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-success">Enroll</button>
+        </div>
+    </form>
+    <h2>Subjects</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Time required (in hours)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subject %}
+            <tr>
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.description }}</td>
+                <td>{{ subject.time_required }}</td>
+                <td>{{ subject.date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+    <h2>Module</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Subject Name</th>
+                <th>Module Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for module in module %}
+            <tr>
+                <td>{{ module.subject.name }}</td>
+                <td>{{ module.module_name }}</td>
+                <td>{{ module.module_description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+</div>
+{% endblock %}

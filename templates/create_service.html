@@ -1,0 +1,221 @@
+{% extends "admin.html" %}
+
+{% block title %}
+Create Service
+{% endblock %}
+
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-success" role="alert">
+        {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+<div class="container mt-4">
+    <h1>Create Subject</h1>
+
+
+    <button class="btn btn-primary mb-4" data-bs-toggle="collapse" href="#addSubjectForm" role="button" aria-expanded="false" aria-controls="addSubjectForm">
+        Add Subject
+    </button>
+
+    <!-- Add New Subject Form -->
+    <div class="collapse" id="addSubjectForm">
+        <form method="POST" action="{{ url_for('create_subject') }}" class="mb-4">
+            <div class="mb-3">
+                <label for="subjectName" class="form-label">Subject Name</label>
+                <input type="text" class="form-control" id="subjectName" name="subject_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="subjectDescription" class="form-label">Subject Description</label>
+                <textarea class="form-control" id="subjectDescription" name="subject_description" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="Time_Required" class="form-label">Time required (in hours)</label>
+                <input type="number" class="form-control" id="Time_Required" name="time_required" required>
+            </div>
+            <div class="mb-3">
+                <label for="Date" class="form-label">Date</label>
+                <input type="datetime-local" class="form-control" id="Date" name="date" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create subject</button>
+        </form>
+    </div>
+
+    <!-- Existing Subjects Table -->
+    {% if subject %}
+    <h2>Existing Subjects</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Subject ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Time required (in hours)</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subject %}
+            <tr>
+                <td>{{ subject.subject_id }}</td>
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.description }}</td>
+                <td>{{ subject.time_required }}</td>
+                <td>{{ subject.date }}</td>
+                <td>
+                    <!-- Edit Button for Subject -->
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubjectModal{{ subject.subject_id }}">Edit</button>
+                    <!-- Delete Button for Subject -->
+                    <form method="POST" action="{{ url_for('delete_subject', subject_id=subject.subject_id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+
+            <!-- Edit Subject Modal -->
+            <div class="modal fade" id="editSubjectModal{{ subject.subject_id }}" tabindex="-1" aria-labelledby="editSubjectModalLabel{{ subject.subject_id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editSubjectModalLabel{{ subject.subject_id }}">Edit Subject</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{{ url_for('edit_subject', subject_id=subject.subject_id) }}">
+                                <div class="mb-3">
+                                    <label for="editSubjectName{{ subject.subject_id }}" class="form-label">Subject Name</label>
+                                    <input type="text" class="form-control" id="editSubjectName{{ subject.subject_id }}" name="subject_name" value="{{ subject.name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editSubjectDescription{{ subject.subject_id }}" class="form-label">Subject Description</label>
+                                    <textarea class="form-control" id="editSubjectDescription{{ subject.subject_id }}" name="subject_description" rows="3" required>{{ subject.description }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editTimeRequired{{ subject.subject_id }}" class="form-label">Time required (in hours)</label>
+                                    <input type="number" class="form-control" id="editTimeRequired{{ subject.subject_id }}" name="time_required" value="{{ subject.time_required }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editDate{{subject.date}}" class="form-label">Date</label>
+                                    <input type="datetime-local" class="form-control" id="editDate{{subject.date}}" name="date" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <!-- Create Quiz Module Form -->
+    {% if subject %}
+    <h2>Create Quiz Module</h2>
+    <button class="btn btn-primary mb-4" data-bs-toggle="collapse" href="#addChapterForm" role="button" aria-expanded="false" aria-controls="addChapterForm">
+        Add Module
+    </button>
+    <div class="collapse" id="addChapterForm">
+        <form method="POST" action="{{ url_for('create_module') }}" class="mb-4">
+            <div class="mb-3">
+                <label for="subject_id" class="form-label">Select Subject</label>
+                <select class="form-select" id="subject_id" name="subject_id">
+                    <option selected disabled>Select a subject</option>
+                    {% for subject in subject %}
+                    <option value="{{ subject.subject_id }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="moduleName" class="form-label">Module Name</label>
+                <input type="text" class="form-control" id="module_Name" name="module_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="module_description" class="form-label">Module Description</label>
+                <textarea class="form-control" id="module_description" name="module_description" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Module</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Existing Modules Table -->
+    {% if module %}
+    <h2>Existing Modules</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Subject ID</th>
+                <th>Subject Name</th>
+                <th>Module Name</th>
+                <th>Module Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for module in module %}
+            <tr>
+                <td>{{ module.subject_id }}</td>
+                <td>{{ module.subject.name }}</td>
+                <td>{{ module.module_name }}</td>
+                <td>{{ module.module_description }}</td>
+                <td>
+                    <!-- Edit Button for Module -->
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModuleModal{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}">Edit</button>
+                    <!-- Delete Button for Module -->
+                    <form method="POST" action="{{ url_for('delete_module', subject_id=module.subject_id, module_name=module.module_name) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+
+            <!-- Edit Module Modal -->
+            <div class="modal fade" id="editModuleModal{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" tabindex="-1" aria-labelledby="editModuleModalLabel{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModuleModalLabel{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}">Edit Module</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{{ url_for('edit_module', subject_id=module.subject_id, module_name=module.module_name) }}">
+                                <div class="mb-3">
+                                    <label for="editModelName{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" class="form-label">Select Subject</label>
+                                    <select class="form-select" id="editModelName{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" name="subject_id" required>
+                                        <option selected disabled>Select a subject</option>
+                                        {% for subject in subject %}
+                                        <option value="{{ subject.subject_id }}" {% if subject.subject_id == module.subject_id %}selected{% endif %}>
+                                            {{ subject.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editModuleName{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" class="form-label">Module Name</label>
+                                    <input type="text" class="form-control" id="editModuleName{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" name="module_name" value="{{ module.module_name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editModuleDescription{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" class="form-label">Module Description</label>
+                                    <textarea class="form-control" id="editModuleDescription{{ module.subject_id }}_{{ module.module_name|replace(' ', '_') }}" name="module_description" rows="3" required>{{ module.module_description }}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+{% endblock %}

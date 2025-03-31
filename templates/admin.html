@@ -1,0 +1,134 @@
+{% extends "navbar.html" %}
+
+{% block title %}
+Admin Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+  <div class="row shadow rounded overflow-hidden bg-white" style="max-width: 1200px; margin: auto;">
+    
+    <!-- User Activity Chart -->
+    <div class="col-md-6 p-4">
+      <canvas id="activityChart" width="400" height="400"></canvas>
+    </div>
+    
+    <!-- Dynamic Subject Score Charts -->
+    {% for subject in subject_data %}
+    <div class="col-md-6 p-4">
+      <canvas id="scoreChart_{{ loop.index }}" width="400" height="400"></canvas>
+      <h4 class="text-center">{{ subject.name }}</h4>
+    </div>
+    {% endfor %}
+    
+    <!-- Charts Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Activity Chart Data
+      const activityData = {
+        labels: ['Active Users', 'Blocked Users'],
+        datasets: [{
+          label: 'User Activity',
+          data: [{{ active_users }}, {{ blocked_users }}],
+          backgroundColor: [
+            'rgba(67, 255, 100, 0.7)',
+            'rgba(1, 25, 58, 0.7)'
+          ],
+          borderColor: [
+            'rgba(67, 255, 100, 1)',
+            'rgba(1, 25, 58, 1)'
+          ],
+          borderWidth: 1
+        }]
+      };
+
+      const activityConfig = {
+        type: 'doughnut',
+        data: activityData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'User Activity' }
+          }
+        }
+      };
+
+      const ctxActivity = document.getElementById('activityChart').getContext('2d');
+      new Chart(ctxActivity, activityConfig);
+
+      // Dynamic Subject Average Score Charts
+      // Pass subject_data from Flask to JavaScript
+      const subjectData = {{ subject_data | tojson }};
+      subjectData.forEach((subject, index) => {
+        const ctx = document.getElementById('scoreChart_' + (index + 1)).getContext('2d');
+        const scoreData = {
+          labels: ['Average Score', 'Remaining'],
+          datasets: [{
+            data: [subject.avg, 100 - subject.avg],
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        };
+
+        const scoreConfig = {
+          type: 'doughnut',
+          data: scoreData,
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' },
+              title: {
+                display: true,
+                text: subject.name + ' Average Quiz Score (%)'
+              }
+            }
+          }
+        };
+
+        new Chart(ctx, scoreConfig);
+      });
+    </script>
+    
+    <!-- Admin User Table -->
+    <div class="col-md-12 p-4">
+      <h1>Admin Panel</h1>
+      <table class="table mt-4">
+        <thead>
+          <tr>
+            <th scope="col">User Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.user_id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ 'Blocked' if user.is_blocked else 'Active' }}</td>
+            <td>
+              <form method="post">
+                <input type="hidden" name="user_id" value="{{ user.user_id }}">
+                <button name="action" value="block" {% if user.is_blocked %}disabled{% endif %}>Block</button>
+                <button name="action" value="unblock" {% if not user.is_blocked %}disabled{% endif %}>Unblock</button>
+                <button name="action" value="delete">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+</div>
+{% endblock %}

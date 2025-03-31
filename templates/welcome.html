@@ -1,0 +1,52 @@
+{% extends "navbar.html" %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  
+  <p>You have successfully logged in {{ user.Salutation }} {{ user.name }}.</p>
+  
+  {% if subject_avg_scores %}
+    <h3>Your Subject-wise Average Scores</h3>
+    <div class="row">
+      {% for subject, avg in subject_avg_scores.items() %}
+        <div class="col-md-4 text-center mb-4">
+          <h4>{{ subject }}</h4>
+          <canvas id="pieChart-{{ loop.index }}" width="250" height="250"></canvas>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script>
+            const ctx{{ loop.index }} = document.getElementById('pieChart-{{ loop.index }}').getContext('2d');
+            new Chart(ctx{{ loop.index }}, {
+                type: 'pie',
+                data: {
+                    labels: ['Scored', 'Remaining'],
+                    datasets: [{
+                        data: [{{ avg }}, {{ 100 - avg }}],
+                        backgroundColor: [
+                          'rgba(75, 192, 192, 0.7)',
+                          'rgba(255, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                          'rgba(75, 192, 192, 1)',
+                          'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: '{{ subject }} Average' }
+                    }
+                }
+            });
+          </script>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No subject scores available yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
